@@ -2,7 +2,7 @@ def recursive_reverse_list(arrayVecchio):
 
     generated=[]
     for i in range(len(arrayVecchio)-1, -1, -1):
-        if(type(arrayVecchio[i])==int):
+        if(type(arrayVecchio[i])!=list):
             generated.append(arrayVecchio[i])
         else:
             generated.append(recursive_reverse_list(arrayVecchio[i]))
