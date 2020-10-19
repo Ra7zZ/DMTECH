@@ -11,10 +11,14 @@ File.close()
 x = []
 y = []
 
-with open("covid.csv", "r") as fp:
-    for line in fp:
-        var = line.split(",")
-        x.append(var[6])
-        y.append(var[1].split("-"))
 
-print(x)
+with open("covid.csv", "r") as fp:
+    row_count = sum(1 for row in fp)
+    for i = 1 in fp.r:
+        var = line.split(",")
+        if(line != "totale_positivi"):
+            y.append(float(var[6]))
+            x.append(var[1])
+
+
+#print(x)
