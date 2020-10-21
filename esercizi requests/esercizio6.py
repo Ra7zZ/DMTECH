@@ -16,8 +16,7 @@ WHERE
    ?item wdt:P495 wd:Q38 .                #origine - italiana
    ?item wdt:P577 ?ddp.             #anno di publicazione - variabile
    OPTIONAL {?item wdt:P345 ?Imdb}.  #OPTIONAL ammette record vuoti perciò è possibile che alcuni non abbiano il codice imdb indicato
-                                     #altrimenti senza OPTIONAL taglierebbe i risultati senza luogo di nascita 
-
+                                     #altrimenti senza OPTIONAL taglierebbe i risultati senza luogo di nascita
    FILTER (YEAR(?ddp) ="""+str(year)+""")
   SERVICE wikibase:label {bd:serviceParam wikibase:language "[AUTO_LANGUAGE],it,en" .}
 }"""
@@ -37,31 +36,23 @@ def get_results(endpoint_url, query):
 def get_film_of(anno):
 
     results = get_film(endpoint_url, anno)
-    film = []
+    film = {}
     for result in results["results"]["bindings"]:
         if "ImdbLabel" in result:
-
+            titolo = result["itemLabel"]["value"]
             data = str(result["ddp"]["value"]).split("T")
             pub_y = str(data[0])
-            titolo = result["itemLabel"]["value"]
             imdb_cod = result["ImdbLabel"]["value"]
-            film[imdb_cod] = {"title" : titolo, "data" : pub_y}
-            
-            """film[imdb_cod]["title"] = titolo
-            film[imdb_cod]["data"] = pub_y"""
-        """itemLabel = result["itemLabel"]
-        if "xml:lang" in itemLabel:
-            data = str(result["ddp"]["value"]).split("T")
-            if "ImdbLabel" in result:
-                stringa = "["+itemLabel["value"].upper()+"] ----- [Codice Imdb "+result["ImdbLabel"]["value"]+"] ----- [Data di pubblicazione "+str(data[0])+"]"
+            if imdb_cod not in film:
+                film[imdb_cod] = {"title" : titolo, "data" : pub_y}
             else:
-                stringa = "["+itemLabel["value"].upper()+"] ----- [Codice Imdb UNKNOWN] ----- [Data di pubblicazione "+str(data[0])+"]"
-            print(stringa)"""
-    #print(film)
+                film[imdb_cod]["data"] = [film[imdb_cod].get("data")]
+                film[imdb_cod]["data"].append(pub_y)
+    print(film)
     #return results
 
 
-"""'item': {'type': 'uri', 'value': 'http://www.wikidata.org/entity/Q305839'}, 
-'ddp': {'datatype': 'http://www.w3.org/2001/XMLSchema#dateTime', 'type': 'literal', 'value': '1940-01-01T00:00:00Z'}, 
-'itemLabel': {'xml:lang': 'it', 'type': 'literal', 'value': 'Abbandono'}, 
+"""'item': {'type': 'uri', 'value': 'http://www.wikidata.org/entity/Q305839'},
+'ddp': {'datatype': 'http://www.w3.org/2001/XMLSchema#dateTime', 'type': 'literal', 'value': '1940-01-01T00:00:00Z'},
+'itemLabel': {'xml:lang': 'it', 'type': 'literal', 'value': 'Abbandono'},
 'ImdbLabel': {'type': 'literal', 'value': 'tt0032180'}"""
