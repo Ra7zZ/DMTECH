@@ -52,9 +52,9 @@ def get_film_by(nome_film):
 
         if "imdb_code" in result:
             imdb_cod = result["imdb_code"]["value"]
-            titoli.append(dict(codice=imdb_cod, title=titolo, data=pub_y))
+            titoli.append(dict(imdb=imdb_cod, title=titolo, data=pub_y))
         else:
             imdb_cod = "UNKNOWN"
-            titoli.append(dict(codice=imdb_cod, title=titolo, data=pub_y))
+            titoli.append(dict(imdb=imdb_cod, title=titolo, data=pub_y))
 
   return titoli
