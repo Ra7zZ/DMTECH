@@ -16,7 +16,7 @@ def get_results(endpoint_url, query):
 
 
 
-def get_film_by(nome_film):
+def get_film_by_name(nome_film):
 
   query1 = """SELECT ?item
        ?itemLabel
