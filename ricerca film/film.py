@@ -18,6 +18,8 @@ def rearrange_data(results):
 
     titoli = []
     for result in results["results"]["bindings"]:
+      link = str(result["item"]["value"]).split("/")
+      q_code = link[4]
       titolo = result["itemLabel"]["value"]
       data = str(result["publication_date"]["value"]).split("T")
       pub_y = str(data[0])
@@ -27,7 +29,8 @@ def rearrange_data(results):
       else:
           imdb_cod = "UNKNOWN"
 
-    titoli.append(dict(imdb=imdb_cod, title=titolo, data=pub_y))
+      titoli.append(dict(q_code = q_code, imdb=imdb_cod, title=titolo, date=pub_y))
+
     return titoli
 
 
@@ -67,30 +70,27 @@ def get_film_by_name(nome_film):
 
 def get_film_by_name_and_year(nome_film, pub_y):
 
-  query2 = """SELECT ?item ?itemLabel (group_concat(distinct ?publication_date;separator="; ") as ?publication_date) (group_concat(distinct ?imdb_code;separator="; ") as ?imdb)
+  query2 = """SELECT ?item ?itemLabel (group_concat(distinct ?imdb_code;separator="; ") as ?imdb)  ?publication_date
+#(group_concat(distinct ?publication_date;separator="; ") as ?publication_date)
+
 WHERE {
  SERVICE wikibase:mwapi
  {
    bd:serviceParam wikibase:api "Search" .
    bd:serviceParam wikibase:endpoint "www.wikidata.org" .
    bd:serviceParam mwapi:srnamespace "0" .
-   bd:serviceParam mwapi:srsearch "haswbstatement:P31=Q11424 inlabel:'"""+nome_film+"""'@en" .
+   bd:serviceParam mwapi:srsearch "haswbstatement:P31=Q11424 inlabel:'star wars'@en" .
    ?item wikibase:apiOutputItem mwapi:title.
  }
   ?item wdt:P577 ?publication_date. hint:Prior hint:rangeSafe true.
   #FILTER("1996-12-31"^^xsd:dateTime < ?publication_date && ?publication_date < "1998-00-00"^^xsd:dateTime)
-  FILTER(YEAR(?publication_date) = """+str(pub_y)+""")
+  FILTER(YEAR(?publication_date) < 1990)
   OPTIONAL {?item wdt:P345 ?imdb_code .}
-  OPTIONAL {?item wdt:P57 ?director .}
-  OPTIONAL {?item wdt:P58 ?screenwriter .}
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en,it,es,de,fr,hu,ro,el,nl,pl,pt,sq" .
-                            ?item rdfs:label ?itemLabel .
-                            ?director rdfs:label ?directorLabel .
-                            ?screenwriter rdfs:label ?screenwriterLabel.}
-} group by ?item ?itemLabel"""
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en,it,es,de,fr,hu,ro" .
+                            ?item rdfs:label ?itemLabel .}
+} group by ?item ?itemLabel ?publication_date"""
 
   results = get_results(endpoint_url, query2)
-
   titoli = rearrange_data(results)
   return titoli
 
