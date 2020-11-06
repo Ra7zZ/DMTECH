@@ -4,7 +4,7 @@
 import sys
 from SPARQLWrapper import SPARQLWrapper, JSON
 from bs4 import BeautifulSoup
-import requests as rq\
+import requests as rq
 
 endpoint_url = "https://query.wikidata.org/sparql"
 
