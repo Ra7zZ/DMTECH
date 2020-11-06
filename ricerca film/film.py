@@ -3,8 +3,12 @@
 
 import sys
 from SPARQLWrapper import SPARQLWrapper, JSON
+from bs4 import BeautifulSoup
+import requests as rq\
 
 endpoint_url = "https://query.wikidata.org/sparql"
+
+movieposterdb = "https://www.movieposterdb.com/search?category=title&q="
 
 def get_results(endpoint_url, query):
     user_agent = "WDQS-example Python/%s.%s" % (sys.version_info[0], sys.version_info[1])
@@ -13,6 +17,29 @@ def get_results(endpoint_url, query):
     sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
     return sparql.query().convert()
+
+
+def get_image(searchurl):
+    req = rq.get(searchurl)
+    html = req.text
+    soup = BeautifulSoup(html, "html.parser")
+
+    imagelinks = []
+    #quì inizia il parsing dell'html della pagina
+    results = soup.findAll("img")
+    for result in results:
+        txt = str(result)
+        if "https" in txt:
+            txt=txt.split("src=\"")
+            txt=txt[1].split("\" ")
+            link=txt[0]
+            imagelinks.append(txt)
+
+    if(len(imagelinks)==0):
+        return "UNKNOWN"
+    else:
+        return link
+
 
 def rearrange_data(results):
 
@@ -26,10 +53,13 @@ def rearrange_data(results):
 
       if "imdb_code" in result:
           imdb_cod = result["imdb_code"]["value"]
+          search_poster = movieposterdb + imdb_cod
+          poster_link = get_image(search_poster)
       else:
           imdb_cod = "UNKNOWN"
+          poster_link = "UNKNOWN"
 
-      titoli.append(dict(q_code = q_code, imdb=imdb_cod, title=titolo, date=pub_y))
+      titoli.append(dict(q_code = q_code, imdb=imdb_cod, title=titolo, date=pub_y, poster = poster_link))
 
     return titoli
 
@@ -40,9 +70,7 @@ def get_film_by_name(nome_film):
        ?itemLabel
        ?publication_date
        ?imdb_code
-
   WHERE {
-
   SERVICE wikibase:mwapi
   {
      bd:serviceParam wikibase:api "Search" .
@@ -51,7 +79,6 @@ def get_film_by_name(nome_film):
      bd:serviceParam mwapi:srsearch "haswbstatement:P31=Q11424 inlabel:'"""+nome_film+"""'@en" .
      ?item wikibase:apiOutputItem mwapi:title.
   }
-
     OPTIONAL {?item wdt:P577 ?publication_date . }
    OPTIONAL {?item wdt:P345 ?imdb_code .}
    SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en,it,es,de,fr,hu,ro,el,nl,pl,pt,sq" .
@@ -72,7 +99,6 @@ def get_film_by_name_and_year(nome_film, pub_y):
 
   query2 = """SELECT ?item ?itemLabel (group_concat(distinct ?imdb_code;separator="; ") as ?imdb)  ?publication_date
 #(group_concat(distinct ?publication_date;separator="; ") as ?publication_date)
-
 WHERE {
  SERVICE wikibase:mwapi
  {
@@ -105,7 +131,6 @@ WHERE
    ?item wdt:P31 wd:Q11424 .                  #istanza - film           +
    ?item wdt:P577 ?publication_date.             #anno di publicazione - variabile
    OPTIONAL {?item wdt:P345 ?Imdb}.
-
    FILTER (YEAR(?publication_date) = """+str(pub_y)+""")
   SERVICE wikibase:label {bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en,it,es,de,fr,hu,ro,el,nl,pl,pt,sq" .}
 }"""
