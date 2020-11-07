@@ -4,7 +4,7 @@
 import sys
 from SPARQLWrapper import SPARQLWrapper, JSON
 from bs4 import BeautifulSoup
-import requests as rq
+import requests as rq\
 
 endpoint_url = "https://query.wikidata.org/sparql"
 
@@ -105,12 +105,12 @@ WHERE {
    bd:serviceParam wikibase:api "Search" .
    bd:serviceParam wikibase:endpoint "www.wikidata.org" .
    bd:serviceParam mwapi:srnamespace "0" .
-   bd:serviceParam mwapi:srsearch "haswbstatement:P31=Q11424 inlabel:'star wars'@en" .
+   bd:serviceParam mwapi:srsearch "haswbstatement:P31=Q11424 inlabel:'"""+nome_film+"""'@en" .
    ?item wikibase:apiOutputItem mwapi:title.
  }
   ?item wdt:P577 ?publication_date. hint:Prior hint:rangeSafe true.
   #FILTER("1996-12-31"^^xsd:dateTime < ?publication_date && ?publication_date < "1998-00-00"^^xsd:dateTime)
-  FILTER(YEAR(?publication_date) < 1990)
+  FILTER(YEAR(?publication_date) ="""+str(pub_y)+""")
   OPTIONAL {?item wdt:P345 ?imdb_code .}
   SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en,it,es,de,fr,hu,ro" .
                             ?item rdfs:label ?itemLabel .}
